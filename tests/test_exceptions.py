@@ -1,15 +1,12 @@
 # Copyright (C) 2012 Anaconda, Inc
 # SPDX-License-Identifier: BSD-3-Clause
-import getpass
 import json
 import sys
-from unittest.mock import patch
 
 import pytest
 from pytest import CaptureFixture, MonkeyPatch
 from pytest_mock import MockerFixture
 
-from conda.auxlib.collection import AttrDict
 from conda.base.constants import PathConflict
 from conda.base.context import context, reset_context
 from conda.common.io import captured
@@ -576,7 +573,7 @@ def test_print_unexpected_error_message_upload_3(
     """
     post_mock = mocker.patch("requests.post")
     input_mock = mocker.patch("builtins.input")
-    isatty_mock = mocker.patch("os.isatty")
+    mocker.patch("os.isatty")
 
     monkeypatch.setenv("CONDA_REPORT_ERRORS", "none")
     monkeypatch.setenv("CONDA_ALWAYS_YES", "false")
@@ -590,8 +587,7 @@ def test_print_unexpected_error_message_upload_3(
     stdout, stderr = capsys.readouterr()
 
     # Since error submission was removed, no prompts or HTTP requests should occur
-    assert isatty_mock.call_count == 0
-    assert input_mock.call_count == 0 
+    assert input_mock.call_count == 0
     assert post_mock.call_count == 0
     assert not stdout
     assert "conda version" in stderr
@@ -605,7 +601,7 @@ def test_print_unexpected_error_message_upload_username_with_spaces(
     Test that error reports are no longer submitted even with CONDA_REPORT_ERRORS=true.
     """
     post_mock = mocker.patch("requests.post")
-    mock_getuser = mocker.patch("getpass.getuser", return_value="some name")
+    mocker.patch("getpass.getuser", return_value="some name")
 
     monkeypatch.setenv("CONDA_REPORT_ERRORS", "true")
     reset_context()
@@ -628,7 +624,7 @@ def test_print_unexpected_error_message_upload_username_with_unicode(
     Test that error reports are no longer submitted even with CONDA_REPORT_ERRORS=true.
     """
     post_mock = mocker.patch("requests.post")
-    mock_getuser = mocker.patch("getpass.getuser", return_value="my√nameΩ")
+    mocker.patch("getpass.getuser", return_value="my√nameΩ")
 
     monkeypatch.setenv("CONDA_REPORT_ERRORS", "true")
     reset_context()
@@ -650,7 +646,7 @@ def test_print_unexpected_error_message_opt_out_1(
     """Test that error reports are not submitted when report_errors is false."""
     input_mock = mocker.patch("builtins.input")
     post_mock = mocker.patch("requests.post")
-    
+
     monkeypatch.setenv("CONDA_REPORT_ERRORS", "false")
     reset_context()
     assert not context.report_errors
@@ -669,9 +665,9 @@ def test_print_unexpected_error_message_opt_out_2(
     mocker: MockerFixture,
 ) -> None:
     """Test that we no longer prompt for confirmation since error reporting is removed."""
-    isatty_mock = mocker.patch("os.isatty")
+    mocker.patch("os.isatty")
     input_mock = mocker.patch("builtins.input")
-    post_mock = mocker.patch("requests.post") 
+    post_mock = mocker.patch("requests.post")
 
     with captured() as c:
         ExceptionHandler()(_raise_helper, AssertionError())

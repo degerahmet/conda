@@ -4,7 +4,7 @@
 
 import os
 import sys
-from functools import cached_property, partial
+from functools import cached_property
 from logging import getLogger
 
 from .common.compat import ensure_text_type, on_win
